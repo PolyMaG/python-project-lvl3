@@ -5,3 +5,5 @@
 [![Build Status](https://travis-ci.org/PolyMaG/python-project-lvl3.svg?branch=master)](https://travis-ci.org/PolyMaG/python-project-lvl3)
 
 [![asciicast](https://asciinema.org/a/DRkGO5JFMhfZTkiHHOyYsTXVc.svg)](https://asciinema.org/a/DRkGO5JFMhfZTkiHHOyYsTXVc)
+
+[![asciicast](https://asciinema.org/a/EYsnHH7YnVSkXmJ8yhkcmbNAI.svg)](https://asciinema.org/a/EYsnHH7YnVSkXmJ8yhkcmbNAI)
