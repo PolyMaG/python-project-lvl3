@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import logging
 from bs4 import BeautifulSoup
 
 
@@ -41,7 +42,7 @@ def make_dir(path, output_path):
     try:
         os.mkdir(dir_name)
     except OSError as error:
-        print(error)
+        logging.error('An error occurred: %s', error)
     return dir_name
 
 
@@ -68,7 +69,7 @@ def save_resources(url, saved_page, dir_name):
             with open(output_full_path, 'w') as feature:
                 feature.write(loaded_data.text)
         resource['src'] = output_full_path
-        print(resource['src'])
+        logging.info('Replaced images and scripts: %s', resource['src'])
     return soup.prettify()
 
 
@@ -87,7 +88,7 @@ def save_links(url, new_page, dir_name):
         with open(output_full_path, 'w') as feature:
             feature.write(loaded_data.text)
         resource['href'] = output_full_path
-        print(resource['href'])
+        logging.info('Replaced links: %s', resource['href'])
     return soup.prettify()
 
 
@@ -96,9 +97,11 @@ def save_page(url, output_path):
     path = get_path(url)
     file_name = make_name(path, '.html')
     dir_name = make_dir(path, output_path)
+    logging.info('Created directory: %s', dir_name)
     output_full_path = os.path.join(output_path, file_name)
     with open(output_full_path, 'w') as feature:
         feature.write(source_data.text)
+    logging.info('Saved page: %s', output_full_path)
     with open(output_full_path, 'r') as feature:
         saved_page = feature.read()
     with open(output_full_path, 'w') as feature:
