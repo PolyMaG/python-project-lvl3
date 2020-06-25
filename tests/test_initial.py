@@ -1,37 +1,47 @@
 import os
 import tempfile
-import requests
 from page_loader.loader import save_page
 
 
-def test_initial():
+def test_exists_regexp():
     with tempfile.TemporaryDirectory() as tmpdirname:
-        exp_file = os.path.join(
-            tmpdirname,
-            'regular-expressions-info-modifiers.html',
-        )
-        assert exp_file == save_page(
+        actual_file = save_page(
             'https://www.regular-expressions.info/modifiers.html',
             tmpdirname,
         )
-        assert True == os.path.exists(save_page(
-            'https://www.regular-expressions.info/modifiers.html',
+        expected_file = os.path.join(
             tmpdirname,
-        ))
-        assert True == os.path.exists(os.path.join(
+            'regular-expressions-info-modifiers-html.html',
+        )
+        expected_dir = os.path.join(
             tmpdirname,
-            'regular-expressions-info-modifiers_files',
+            'regular-expressions-info-modifiers-html_files',
+        )
+        expected_img = os.path.join(
+            tmpdirname,
+            'regular-expressions-info-modifiers-html_files',
             'ads-728-rxbtutorial100.png',
-        ))
-        loaded_data = requests.get('https://www.regular-expressions.info/regex.js')
-        with open(os.path.join(tmpdirname, 'regex.js'), 'w') as feature:
-            feature.write(loaded_data.text)
-        with open(os.path.join(tmpdirname, 'regex.js'), 'r') as feature:
-            expected = feature.read()
-        with open(os.path.join(
+        )
+        assert os.path.isfile(actual_file)
+        assert expected_file == actual_file
+        assert os.path.isdir(expected_dir)
+        assert os.path.isfile(expected_img)
+
+
+def test_exists_hexlet():
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        actual_file = save_page(
+            'https://ru.hexlet.io/courses',
             tmpdirname,
-            'regular-expressions-info-modifiers_files',
-            'regex.js',
-        ), 'r') as fixture:
-            actual = fixture.read()
-        assert expected == actual
+        )
+        expected_file = os.path.join(
+            tmpdirname,
+            'ru-hexlet-io-courses.html',
+        )
+        expected_dir = os.path.join(
+            tmpdirname,
+            'ru-hexlet-io-courses_files',
+        )
+        assert os.path.isfile(actual_file)
+        assert expected_file == actual_file
+        assert os.path.isdir(expected_dir)
