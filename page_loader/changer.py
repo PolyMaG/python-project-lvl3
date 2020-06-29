@@ -1,6 +1,6 @@
+import logging
 import os
 import re
-import logging
 
 
 class KnownError(Exception):
@@ -32,12 +32,14 @@ def change_name(path):
     return new_name
 
 
-def make_name(path, extension):
+def make_name(url, extension):
+    path = cut_url(url)
     return change_name(path) + extension
 
 
-def make_dir(path, output_path):
-    dir_name = os.path.join(output_path, make_name(path, '_files'))
+def make_dir(dir, url):
+    path = cut_url(url)
+    dir_name = os.path.join(dir, make_name(path, '_files'))
     try:
         os.mkdir(dir_name)
     except OSError as error:
@@ -47,4 +49,6 @@ def make_dir(path, output_path):
             dir_name,
         )
         raise KnownError() from error
-    return dir_name
+    else:
+        logging.info('Created directory: %s', dir_name)
+        return dir_name

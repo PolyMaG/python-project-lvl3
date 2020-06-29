@@ -1,45 +1,72 @@
+import logging
 import os
 import time
-import logging
+
 from progress.bar import IncrementalBar
+
 import page_loader.saver as save
-from page_loader.changer import cut_url, make_name, make_dir
+from page_loader.changer import make_dir, make_name
 
 
-def save_page(url, output_path):
-    page_data = save.data(url)
-    path = cut_url(url)
-    file_name = make_name(path, '.html')
-    dir_name = make_dir(path, output_path)
-    logging.info('Created directory: %s', dir_name)
-    output_full_path = os.path.join(output_path, file_name)
+def prepare_data(url, output_dir):
+    page_data = save.url_data(url)
+    dir_to_save = make_dir(output_dir, url)
+    file_name = make_name(url, '.html')
+    output_full_path = os.path.join(output_dir, file_name)
+    return output_full_path, page_data, dir_to_save
+
+
+def save_page(url, output_dir):
+    output_full_path, page_data, dir_to_save = prepare_data(url, output_dir)
+    saved_page = open_page(download_page(output_full_path, page_data))
+    saved_page_with_resources = download_resources(
+        output_full_path,
+        url,
+        saved_page,
+        dir_to_save,
+    )
+    return saved_page_with_resources
+
+
+def download_page(output_full_path, page_data):
     with open(output_full_path, 'w') as feature:
         try:
-            with IncrementalBar('Page saving', max=1) as bar:
-                for i in range(1):
-                    time.sleep(0.15)
+            with IncrementalBar('Page saving', max=10) as bar:
+                for item in range(10):
+                    time.sleep(0.05)
                     bar.next()
             feature.write(page_data.text)
+        except OSError as err:
+            logging.debug(err, exc_info=True)
+            logging.error("Can't save the page. An error occurred: %s", err)
+        else:
             logging.info(
                 '\u2713 Page was downloaded as %s',
                 output_full_path,
             )
-        except OSError as err:
-            logging.debug(err, exc_info=True)
-            logging.error("Can't save the page. An error occurred: %s", err)
+            return output_full_path
+
+
+def open_page(output_full_path):
     with open(output_full_path, 'r') as feature:
         try:
             saved_page = feature.read()
         except OSError as err:
             logging.debug(err, exc_info=True)
             logging.error("Can't read saved page: %s", err)
+        else:
+            return saved_page
+
+
+def download_resources(output_full_path, url, html_doc, dir_to_save):
     with open(output_full_path, 'w') as feature:
         try:
-            feature.write(save.resources(url, saved_page, dir_name))
+            feature.write(save.resources(url, html_doc, dir_to_save))
         except OSError as err:
             logging.debug(err, exc_info=True)
             logging.error(
-                "Something went wrong while saving resources: %s",
+                'Something went wrong while saving resources: %s',
                 err,
             )
-    return output_full_path
+        else:
+            return output_full_path
