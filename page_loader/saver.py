@@ -117,7 +117,7 @@ def images(soup, domain, dir):
         output_full_path = os.path.join(dir, file_name)
         with open(output_full_path, 'wb') as feature:
             try:
-                for chunk in src_data.item_content(chunk_size=128):
+                for chunk in src_data.iter_content(chunk_size=128):
                     feature.write(chunk)
             except OSError as err:
                 logging.debug(err, exc_info=True)
