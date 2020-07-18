@@ -5,11 +5,11 @@ import time
 from progress.bar import IncrementalBar
 
 import page_loader.saver as save
-from page_loader.changer import make_dir, make_name
+from page_loader.modifier import make_dir, make_name
 
 
 def prepare_data(url, output_dir):
-    page_data = save.url_data(url)
+    page_data = save.get_response(url)
     dir_to_save = make_dir(output_dir, url)
     file_name = make_name(url, '.html')
     output_full_path = os.path.join(output_dir, file_name)

@@ -4,30 +4,35 @@ import logging
 import os
 import sys
 
-from page_loader.changer import KnownError
+from page_loader.modifier import KnownError
 from page_loader.loader import save_page
 
-parser = argparse.ArgumentParser(description='page-loader')
-parser.add_argument(
-    '--output',
-    default='.',
-    help='set the directory to save to',
-)
-levels = ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
-parser.add_argument(
-    '--loglevel',
-    default='INFO',
-    choices=levels,
-    help='set the level of log message severity',
-)
-parser.add_argument('url')
+
+def parser(arg_list):
+    parser = argparse.ArgumentParser(description='page-loader')
+    parser.add_argument(
+        '-o', '--output',
+        default='.',
+        help='set the directory to save to',
+    )
+    parser.add_argument(
+        '--loglevel',
+        default='INFO',
+        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'),
+        help='set the level of log message severity',
+    )
+    parser.add_argument('url')
+    return parser
+
+
+FORMAT = '%(levelname)s: %(message)s'
 
 
 def main():
-    args = parser.parse_args()
+    args = parser(sys.argv[1:]).parse_args()
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(levelname)s: %(message)s',
+        format=FORMAT,
         filename=os.path.join(args.output, 'logfile.log'),
         filemode='w',
     )
@@ -36,13 +41,14 @@ def main():
     formatter = logging.Formatter('%(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
-    logging.info('Started')
+    logging.info('Started.')
     try:
         save_page(args.url, args.output)
     except KnownError:
+        logging.error('Program has stopped.')
         sys.exit(1)
     else:
-        logging.info('Finished')
+        logging.info('Finished.')
 
 
 if __name__ == '__main__':

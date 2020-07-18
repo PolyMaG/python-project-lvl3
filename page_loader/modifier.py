@@ -2,27 +2,33 @@ import logging
 import os
 import re
 
+from urllib.parse import urlparse, urlunparse
+
 
 class KnownError(Exception):
     pass
 
 
 def cut_url(url):
-    if url[:8] == 'https://':
-        cutted_url = url[8:]
-    elif url[:7] == 'http://':
-        cutted_url = url[7:]
-    else:
-        cutted_url = url
-    if cutted_url[:3] == 'www':
-        cutted_url = cutted_url[4:]
-    return cutted_url
+    u = urlparse(url)
+    if u.netloc == '':
+        return url
+    elif u.netloc[:3] == 'www':
+        return urlunparse(u._replace(scheme='', netloc=u.netloc[4:]))[2:]
+    return urlunparse(u._replace(scheme=''))[2:]
 
 
 def get_domain(url):
-    cutted_url = cut_url(url)
-    domain = re.match(r'^[\w\.-]+', cutted_url)
-    return 'https://' + domain.group(0)
+    u = urlparse('//' + cut_url(url))
+    return urlunparse(
+        u._replace(
+            scheme='https',
+            path='',
+            params='',
+            query='',
+            fragment='',
+        )
+    )
 
 
 def change_name(path):

@@ -1,6 +1,6 @@
 import tempfile
 import pytest
-from page_loader.changer import KnownError
+from page_loader.modifier import KnownError
 from page_loader.loader import save_page
 
 
