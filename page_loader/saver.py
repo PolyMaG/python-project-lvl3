@@ -37,35 +37,37 @@ def resources(url, html_doc, dir):
     soup = BeautifulSoup(html_doc, 'html.parser')
     with IncrementalBar('Scripts saving', max=10) as bar:
         for item in range(10):
-            time.sleep(0.05)
+            time.sleep(0.10)
             bar.next()
     scripts_soup = save_src(
         soup, domain, dir,
-        tag='script', attr='src',
+        tag='script',
     )
     with IncrementalBar('Links saving', max=10) as bar:
         for item in range(10):
-            time.sleep(0.05)
+            time.sleep(0.10)
             bar.next()
     links_soup = save_src(
         scripts_soup, domain, dir,
-        tag='link', attr='href',
+        tag='link',
     )
     with IncrementalBar('Images saving', max=10) as bar:
         for item in range(10):
-            time.sleep(0.05)
+            time.sleep(0.10)
             bar.next()
     images_soup = save_src(
         links_soup, domain, dir,
-        tag='img', attr='src',
+        tag='img',
     )
     return images_soup.prettify()
 
 
-def save_src(soup, domain, dir, tag, attr):
+def save_src(soup, domain, dir, tag):
     if tag in ['script', 'img']:
+        attr = 'src'
         attrs = {'src': local_links}
     elif tag == 'link':
+        attr = 'href'
         attrs = {'href': local_links}
     for resource in soup.find_all(tag, attrs):
         src_to_load = os.path.join(domain, resource.get(attr))
