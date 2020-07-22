@@ -18,17 +18,17 @@ def prepare_data(url, output_dir):
 
 def save_page(url, output_dir):
     output_full_path, page_data, dir_to_save = prepare_data(url, output_dir)
-    saved_page = open_page(download_page(output_full_path, page_data))
-    saved_page_with_resources = download_resources(
+    saved_page_html = open_page(save_html(output_full_path, page_data))
+    saved_page_with_resources = save_resources(
         output_full_path,
         url,
-        saved_page,
+        saved_page_html,
         dir_to_save,
     )
     return saved_page_with_resources
 
 
-def download_page(output_full_path, page_data):
+def save_html(output_full_path, page_data):
     with open(output_full_path, 'w') as feature:
         try:
             with IncrementalBar('Page saving', max=10) as bar:
@@ -58,7 +58,7 @@ def open_page(output_full_path):
             return saved_page
 
 
-def download_resources(output_full_path, url, html_doc, dir_to_save):
+def save_resources(output_full_path, url, html_doc, dir_to_save):
     with open(output_full_path, 'w') as feature:
         try:
             feature.write(save.resources(url, html_doc, dir_to_save))

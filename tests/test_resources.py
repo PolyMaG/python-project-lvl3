@@ -1,10 +1,13 @@
 import os
 import tempfile
+
+import pytest
 import requests
+
 from page_loader.loader import save_page
 
 
-def test_save_resources():
+def prepare_regexp():
     with tempfile.TemporaryDirectory() as tmpdirname:
         save_page(
             'https://www.regular-expressions.info/modifiers.html',
@@ -22,4 +25,12 @@ def test_save_resources():
             'regex.js',
         ), 'r') as fixture:
             actual = fixture.read()
-        assert expected == actual
+        return (expected, actual)
+
+
+@pytest.mark.parametrize(
+    "expected,actual",
+    [(prepare_regexp()[0], prepare_regexp()[1])]
+)
+def test_regexp(expected, actual):
+    assert expected == actual
