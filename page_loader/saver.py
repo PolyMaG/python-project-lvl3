@@ -7,9 +7,11 @@ import requests
 from bs4 import BeautifulSoup
 from progress.bar import IncrementalBar
 
-from page_loader.modifier import KnownError, get_domain, make_name
+from page_loader.modifier import KnownError, make_name, parse_url
 
-local_links = re.compile(r'^(?!(\/|.+\/{2}))(?=\/?\w+)')
+LINKS_TO_SAVE = (SCRIPT, LINK, IMAGE) = ('script', 'link', 'img')
+ATTRIBUTES = (SRC, HREF) = ('src', 'href')
+LOCAL_LINKS = re.compile(r'^(?!(\/|.+\/{2}))(?=\/?\w+)')
 
 
 def get_response(url, stream=None):
@@ -33,7 +35,7 @@ def get_response(url, stream=None):
 
 
 def resources(url, html_doc, dir):
-    domain = get_domain(url)
+    _, domain = parse_url(url)
     soup = BeautifulSoup(html_doc, 'html.parser')
     with IncrementalBar('Scripts saving', max=10) as bar:
         for item in range(10):
@@ -41,7 +43,7 @@ def resources(url, html_doc, dir):
             bar.next()
     scripts_soup = save_src(
         soup, domain, dir,
-        tag='script',
+        tag=SCRIPT,
     )
     with IncrementalBar('Links saving', max=10) as bar:
         for item in range(10):
@@ -49,7 +51,7 @@ def resources(url, html_doc, dir):
             bar.next()
     links_soup = save_src(
         scripts_soup, domain, dir,
-        tag='link',
+        tag=LINK,
     )
     with IncrementalBar('Images saving', max=10) as bar:
         for item in range(10):
@@ -57,28 +59,28 @@ def resources(url, html_doc, dir):
             bar.next()
     images_soup = save_src(
         links_soup, domain, dir,
-        tag='img',
+        tag=IMAGE,
     )
     return images_soup.prettify()
 
 
 def save_src(soup, domain, dir, tag):
-    if tag in ['script', 'img']:
-        attr = 'src'
-        attrs = {'src': local_links}
-    elif tag == 'link':
-        attr = 'href'
-        attrs = {'href': local_links}
+    if tag in [SCRIPT, IMAGE]:
+        attr = SRC
+        attrs = {SRC: LOCAL_LINKS}
+    elif tag == LINK:
+        attr = HREF
+        attrs = {HREF: LOCAL_LINKS}
     for resource in soup.find_all(tag, attrs):
         src_to_load = os.path.join(domain, resource.get(attr))
-        if tag in ['script', 'link']:
+        if tag in [SCRIPT, LINK]:
             src_data = get_response(src_to_load)
-        elif tag == 'img':
+        elif tag == IMAGE:
             src_data = get_response(src_to_load, stream=True)
         name, extension = os.path.splitext(resource.get(attr))
         file_name = make_name(name, extension)
         output_full_path = os.path.join(dir, file_name)
-        if tag == 'img':
+        if tag == IMAGE:
             with open(output_full_path, 'wb') as feature:
                 try:
                     for chunk in src_data.iter_content(chunk_size=128):
@@ -90,7 +92,7 @@ def save_src(soup, domain, dir, tag):
                         output_full_path,
                         err,
                     )
-        elif tag in ['script', 'link']:
+        elif tag in [SCRIPT, LINK]:
             with open(output_full_path, 'w') as feature:
                 try:
                     feature.write(src_data.text)

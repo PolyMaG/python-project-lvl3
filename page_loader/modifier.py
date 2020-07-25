@@ -8,43 +8,36 @@ class KnownError(Exception):
     pass
 
 
-def cut_url(url):
-    u = urlparse(url)
-    if u.netloc == '':
-        return url
-    elif u.netloc[:3] == 'www':
-        return urlunparse(u._replace(scheme='', netloc=u.netloc[4:]))[2:]
-    return urlunparse(u._replace(scheme=''))[2:]
-
-
-def get_domain(url):
-    u = urlparse('//' + cut_url(url))
-    return urlunparse(
-        u._replace(
-            scheme='https',
-            path='',
-            params='',
-            query='',
-            fragment='',
-        )
-    )
+def parse_url(url):
+    parsed_url = urlparse(url)
+    domain = os.path.join('https://', parsed_url.netloc.strip('/'))
+    if parsed_url.netloc == '':
+        domain = os.path.join('https://', url)
+        return url, domain
+    elif parsed_url.netloc[:3] == 'www':
+        path = urlunparse(parsed_url._replace(
+            scheme='',
+            netloc=parsed_url.netloc[4:])
+        ).strip('/')
+        return path, domain
+    path = urlunparse(parsed_url._replace(scheme='')).strip('/')
+    return path, domain
 
 
 def change_name(path):
     divider = '-'
-    old_name = cut_url(path)
-    new_name = re.sub(r'[\W_]', divider, old_name)
+    new_name = re.sub(r'[\W_]', divider, path)
     return new_name
 
 
 def make_name(url, extension):
-    path = cut_url(url)
-    return change_name(path) + extension
+    path_to_file, _ = parse_url(url)
+    return change_name(path_to_file) + extension
 
 
 def make_dir(dir, url):
-    path = cut_url(url)
-    dir_name = os.path.join(dir, make_name(path, '_files'))
+    path_to_dir, _ = parse_url(url)
+    dir_name = os.path.join(dir, make_name(path_to_dir, '_files'))
     try:
         os.mkdir(dir_name)
     except OSError as error:

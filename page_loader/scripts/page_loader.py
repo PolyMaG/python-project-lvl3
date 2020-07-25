@@ -8,6 +8,9 @@ from page_loader.modifier import KnownError
 from page_loader.loader import save_page
 
 
+FORMAT = '%(levelname)s: %(message)s'
+
+
 def parser(arg_list):
     parser = argparse.ArgumentParser(description='page-loader')
     parser.add_argument(
@@ -23,9 +26,6 @@ def parser(arg_list):
     )
     parser.add_argument('url')
     return parser
-
-
-FORMAT = '%(levelname)s: %(message)s'
 
 
 def main():
