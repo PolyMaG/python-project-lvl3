@@ -9,7 +9,7 @@ from progress.bar import IncrementalBar
 
 from page_loader.modifier import KnownError, make_name, parse_url
 
-LINKS_TO_SAVE = (SCRIPT, LINK, IMAGE) = ('script', 'link', 'img')
+TAGS = (SCRIPT, LINK, IMAGE) = ('script', 'link', 'img')
 ATTRIBUTES = (SRC, HREF) = ('src', 'href')
 LOCAL_LINKS = re.compile(r'^(?!(\/|.+\/{2}))(?=\/?\w+)')
 
