@@ -102,11 +102,25 @@ def make_dir(dir, url):
         return dir_name
 
 
-def generate_url_and_path(domain, resource, dir):
-    # make a valid url to load data from source
-    url_to_save = os.path.join(domain, resource.group(0))
-    #  generate full local path for loaded resource
-    name, extension = os.path.splitext(resource.group(0))
+def generate_url_and_path(domain, file_name, dir):
+    """
+    Generate valid URL to load data from source
+    by joining domain name and file name.
+    Generate full local path regarding to URL
+    by joining given directory and file name.
+
+    Args:
+        domain (string): Domain name to make valid URL.
+        file_name (string): File name to make valid URL.
+        dir (string): Part of a name of local path.
+
+    Returns:
+        tuple:
+            string: valid URL
+            string: Local path
+    """
+    url_to_save = os.path.join(domain, file_name)
+    name, extension = os.path.splitext(file_name)
     file_name = make_name(name, extension)
     local_path = os.path.join(dir, file_name)
     return url_to_save, local_path
@@ -120,14 +134,16 @@ def parse_html(url, html_doc, dir):
     replace path to resource to a local one.
 
     Args:
-        url (string): [Description]
-        html_doc (string): html to parse.
-        dir (string): [description]
+        url (string): Extract domain name to make valid URL
+            to download selected resource.
+        html_doc (string): Html to parse.
+        dir (string): Part of a name of local path for selected resources.
 
     Returns:
-        object: BeautifulSoup object with replaced links.
-        dict: Keys - local resources (scripts, links, images) URL,
-            Values - replaced paths to a local ones.
+        tuple:
+            object: BeautifulSoup object with replaced links.
+            dict: Keys - local resources (scripts, links, images) URL,
+                Values - replaced paths to a local ones.
     """
     scripts_to_save = {}
     links_to_save = {}
@@ -139,22 +155,22 @@ def parse_html(url, html_doc, dir):
             local_script = re.match(LOCAL_PATTERN, tag.get('src'))
             if local_script:
                 url_to_save, local_path = generate_url_and_path(
-                    domain, local_script, dir)
-                #  replace saved resource name with a local one
+                    domain, local_script.group(0), dir)
+                #  replace resource name with a local one
                 tag['src'] = local_path
                 scripts_to_save[url_to_save] = local_path
         elif tag.has_attr('href') and tag.get('href'):
             local_link = re.match(LOCAL_PATTERN, tag.get('href'))
             if local_link:
                 url_to_save, local_path = generate_url_and_path(
-                    domain, local_link, dir)
+                    domain, local_link.group(0), dir)
                 tag['href'] = local_path
                 links_to_save[url_to_save] = local_path
         elif tag.name == IMAGE and tag.get('src'):
             local_image = re.match(LOCAL_PATTERN, tag.get('src'))
             if local_image:
                 url_to_save, local_path = generate_url_and_path(
-                    domain, local_image, dir)
+                    domain, local_image.group(0), dir)
                 tag['src'] = local_path
                 images_to_save[url_to_save] = local_path
     return soup.prettify(), scripts_to_save, links_to_save, images_to_save
