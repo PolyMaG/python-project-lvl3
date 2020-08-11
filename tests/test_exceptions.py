@@ -2,8 +2,8 @@ import tempfile
 
 import pytest
 
+from page_loader.helpers import KnownError
 from page_loader.loader import save_page
-from page_loader.modifier import KnownError
 
 
 def test_existing_dir():
