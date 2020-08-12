@@ -32,7 +32,7 @@ def parse_url(url):
     if parsed_url.netloc == '':
         domain = os.path.join('https://', url)
         return url, domain
-    elif parsed_url.netloc[:3] == 'www':
+    elif parsed_url.netloc.startswith('www'):
         path = urlunparse(parsed_url._replace(
             scheme='',
             netloc=parsed_url.netloc[4:],
